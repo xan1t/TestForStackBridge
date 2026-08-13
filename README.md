@@ -308,25 +308,90 @@ GET https://api.petrushka-zelenaya.ru/api/v1/partner-stores
   "stores": [
     {
       "id": 1,
-      "name": "Зеленый маркет",
-      "logo": "https://example.com/images/green-market.png",
-      "description": "Продукты и товары для дома",
-      "external_url": "https://green-market.example.com"
+      "name": "METRO",
+      "logo": "https://example.com/images/METRO.png",
+      "delivery": {
+        "type": "scheduled",
+        "title": "Ближайшая доставка",
+        "text": "Сегодня 21:00-23:00"
+      },
+      "external_url": "https://METRO.example.com"
     },
     {
       "id": 2,
-      "name": "ЭкоДом",
-      "logo": "https://example.com/images/ecodom.png",
-      "description": "Экологичные товары для дома",
-      "external_url": "https://ecodom.example.com"
+      "name": "АШАН",
+      "logo": "https://example.com/images/AShAN.png",
+      "delivery": {
+        "type": "express",
+        "title": "Ближайшая доставка",
+        "text": "Сегодня 18:00-20:00"
+      },
+      "external_url": "https://ASHAN.example.com"
     },
     {
       "id": 3,
-      "name": "Фермерская лавка",
-      "logo": "https://example.com/images/farm-shop.png",
-      "description": "Фермерские продукты",
-      "external_url": "https://farm-shop.example.com"
+      "name": "ВкусВилл",
+      "logo": "https://example.com/images/VkusVill.png",
+      "delivery": {
+        "type": "express",
+        "title": "Быстрая доставка",
+        "text": "От 20 до 60 минут"
+      },
+      "external_url": "https://VkusVill.example.com"
     }
   ]
 }
 ```
+
+
+# Задание 3. Архитектура PUSH-уведомлений
+
+## Архитектура
+
+```mermaid
+flowchart LR
+
+    APP[Mobile Application]
+
+    API[API Gateway]
+
+    CART[Cart Service]
+    ORDER[Order Service]
+    MARKETING[Marketing Service]
+    SCHEDULER[Scheduler]
+
+    BROKER[Message Broker]
+
+    NOTIFICATION[Notification Service]
+
+    PREFS[(User Notification Preferences)]
+    TOKENS[(Device Token Store)]
+
+    QUEUE[Notification Queue]
+
+    WORKER[Push Worker]
+
+    FCM[FCM]
+    APNS[APNs]
+
+    CART -->|Cart event| BROKER
+    ORDER -->|Order event| BROKER
+    MARKETING -->|Marketing campaign| BROKER
+    SCHEDULER -->|Scheduled event| BROKER
+
+    BROKER --> NOTIFICATION
+
+    APP -->|Register / update push token| API
+    API --> NOTIFICATION
+
+    NOTIFICATION --> TOKENS
+    NOTIFICATION --> PREFS
+
+    NOTIFICATION --> QUEUE
+    QUEUE --> WORKER
+
+    WORKER --> FCM
+    WORKER --> APNS
+
+    FCM --> APP
+    APNS --> APP
